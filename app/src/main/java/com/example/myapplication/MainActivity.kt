@@ -66,6 +66,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.myapplication.ui.theme.MyApplicationTheme
+import java.util.LinkedList
 
 
 class MainActivity : ComponentActivity() {
@@ -89,10 +90,15 @@ class MainActivity : ComponentActivity() {
 fun GameScreenInitial() {
     val availableColors= listOf(Color.Blue, Color.Yellow, Color.Cyan, Color.Black, Color.Gray, Color.Red,Color.Magenta,Color.Green,
         Color.DarkGray, Color.White)
-    val choosenColors= remember { mutableStateListOf<Color>(Color.White, Color.White,Color.White,Color.White) }
+    val backgroundColor=Color.White
+    val choosenColors= remember { mutableStateListOf<Color>(backgroundColor, backgroundColor,backgroundColor,backgroundColor) }
     val correctColors = selectRandomColors(availableColors)
     var rounds=1
-    var rowData: List<List<Color>> = listOf(choosenColors)
+    var choosenColorsList: LinkedList< SnapshotStateList<Color>> =LinkedList()
+    var infoColorsList: LinkedList<List<Color>> = LinkedList()
+    infoColorsList.addFirst(listOf<Color>(backgroundColor,backgroundColor,backgroundColor,backgroundColor))
+    choosenColorsList.addFirst(choosenColors)
+    //choosenColorsList.addLast(remember {mutableStateListOf(Color.Yellow,Color.Yellow,Color.Yellow,Color.Yellow)})
     Column{
         Text(
             text = "Test",
@@ -106,10 +112,10 @@ fun GameScreenInitial() {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-            items(rowData.size) { rowNumber ->
-                        GameRow(choosenColors = choosenColors, infoColors = checkColors(choosenColors,correctColors,Color.Magenta), click = true,
+            items(choosenColorsList.size) { rowNumber ->
+                        GameRow(choosenColors = choosenColorsList[rowNumber], infoColors = infoColorsList[rowNumber], click = true,
                             onSelectColorClick = {index->selectNextAvailableColor(availableColors,choosenColors,index)},
-                            onCheckClick = { checkColors(choosenColors,correctColors,Color.White) })
+                            onCheckClick = { checkColors(choosenColors,correctColors,backgroundColor) })
             }
 
 
@@ -119,26 +125,26 @@ fun GameScreenInitial() {
     }
 }
 @Composable
-fun SelectableColorsRow(colorList: List<Color>, onClick:(Int)->Unit){
+fun SelectableColorsRow(colorList: List<Color>,clickable:Boolean, onClick:(Int)->Unit){
     Row(horizontalArrangement =
             Arrangement.spacedBy(5.dp)) {
         for (index in colorList.indices){
-            CircularButton(onClick ={onClick(index)} , color = colorList[index])
+            CircularButton(onClick ={onClick(index)} , color = colorList[index], clickable=clickable)
         }
     }
 }
 
 @Composable
-fun CircularButton(onClick: ()->Unit,color: Color = Color.White) {
+fun CircularButton(onClick: ()->Unit,color: Color = Color.White, clickable: Boolean) {
     Button(onClick = { onClick() },
         modifier = Modifier
             .size(50.dp)
             .background(color = MaterialTheme.colorScheme.background),
-        border = BorderStroke(2.dp,
-            MaterialTheme.colorScheme.outline),
-        colors =
-        ButtonDefaults.buttonColors(containerColor = color, contentColor =
-        MaterialTheme.colorScheme.onBackground)
+        border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline),
+        colors = ButtonDefaults.buttonColors(containerColor = color,
+            contentColor =MaterialTheme.colorScheme.onBackground),
+        enabled = clickable
+
 
     ) {
 
@@ -175,7 +181,8 @@ fun GameRow(choosenColors: MutableList<Color>, infoColors: List<Color>, click: B
             onSelectColorClick: (Int)->Unit, onCheckClick:()->Unit){
 
     Row (horizontalArrangement = Arrangement.spacedBy(5.dp)){
-        SelectableColorsRow(choosenColors, onClick = { index -> onSelectColorClick(index) })
+        SelectableColorsRow(choosenColors, clickable= click,
+            onClick = { index -> onSelectColorClick(index) })
         IconButton(onClick = { onCheckClick() },
             modifier = Modifier
                 .clip(CircleShape)
@@ -197,7 +204,7 @@ fun selectNextAvailableColor(availableColors: List<Color>, choosenColors: Mutabl
 
     val availableColorsWithoutSelected = availableColors.filter { !selectedColorsSet.contains(it) }
 
-    val currentIndex = availableColorsWithoutSelected.indexOf(selectedColorForButton)
+    val currentIndex = availableColors.indexOf(selectedColorForButton)
 
     val nextIndex = (currentIndex + 1) % availableColorsWithoutSelected.size
 
@@ -208,7 +215,7 @@ fun selectRandomColors(availableColors: List<Color>): List<Color>{
     return availableColors.shuffled().distinct().take(4)
 }
 fun checkColors(choosenColors: MutableList<Color>, correctColors:List<Color>, backgroundColor: Color): List<Color>{
-    var returnList = mutableListOf<Color>(Color.White,Color.White,Color.White, Color.White)
+    var returnList = mutableListOf<Color>(backgroundColor,backgroundColor,backgroundColor, backgroundColor)
     for(index1 in choosenColors.indices) {
         if(correctColors.contains(choosenColors[index1])){
             val index2 = correctColors.indexOf(choosenColors[index1])
