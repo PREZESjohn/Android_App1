@@ -93,35 +93,54 @@ fun GameScreenInitial() {
     val backgroundColor=Color.White
     val choosenColors= remember { mutableStateListOf<Color>(backgroundColor, backgroundColor,backgroundColor,backgroundColor) }
     val correctColors = selectRandomColors(availableColors)
-    var rounds=1
-    var choosenColorsList: LinkedList< SnapshotStateList<Color>> =LinkedList()
+
+    var choosenColorsList= remember {mutableStateListOf<List<Color>>()}
     var infoColorsList: LinkedList<List<Color>> = LinkedList()
-    infoColorsList.addFirst(listOf<Color>(backgroundColor,backgroundColor,backgroundColor,backgroundColor))
-    choosenColorsList.addFirst(choosenColors)
-    //choosenColorsList.addLast(remember {mutableStateListOf(Color.Yellow,Color.Yellow,Color.Yellow,Color.Yellow)})
+    var gamePlaying = true
+    val rounds = remember {mutableStateOf(0)}
+
     Column{
         Text(
-            text = "Test",
+            text = "Your score: ", // jak dodam tu wyswietlenie jakiej kolwiek zmiennej remember to od nowa inicjuje zmienne i sie psuje wyswieltanie gamerow
             style = MaterialTheme.typography.displayLarge,
             modifier = Modifier.padding(bottom = 48.dp)
         )
 
-        val colorList= listOf(Color.Red,Color.Black,Color.Blue,Color.Yellow)
+        val colorListInitial= listOf(Color.White,Color.White,Color.White,Color.White)
         LazyColumn(
-            modifier = Modifier.fillMaxHeight(),
+            modifier = Modifier
+                .fillMaxHeight()
+                .padding(5.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
             items(choosenColorsList.size) { rowNumber ->
-                        GameRow(choosenColors = choosenColorsList[rowNumber], infoColors = infoColorsList[rowNumber], click = true,
-                            onSelectColorClick = {index->selectNextAvailableColor(availableColors,choosenColors,index)},
-                            onCheckClick = { checkColors(choosenColors,correctColors,backgroundColor) })
+                        GameRow(choosenColors = choosenColorsList[rowNumber].toMutableList(), infoColors = infoColorsList[rowNumber],
+                            click = false,
+                            onSelectColorClick = {},
+                            onCheckClick = {  })
             }
-
-
-
+            item {
+                GameRow(choosenColors = choosenColors, infoColors = colorListInitial, click = true,
+                    onSelectColorClick = {index->selectNextAvailableColor(availableColors,choosenColors,index)},
+                    onCheckClick = {
+                        infoColorsList.add(checkColors(choosenColors, correctColors, backgroundColor))
+                        choosenColorsList.add(choosenColors.toList())
+                        rounds.value+=1
+                    })
+            }
        }
-        //GameRow(choosenColors = colorList, infoColors = colorList, click = true, onSelectColorClick = {}, onCheckClick = { checkColors(colorList,colorList,Color.White) })
+//        if(choosenColorsList.size>4){
+//            Button(
+//                onClick = { /*TODO*/ },
+//                modifier = Modifier.padding(10.dp)
+//                    .background(Color.Cyan)
+//
+//            ) {
+//                Text("Start over")
+//            }
+//        }
+
     }
 }
 @Composable
@@ -136,19 +155,17 @@ fun SelectableColorsRow(colorList: List<Color>,clickable:Boolean, onClick:(Int)-
 
 @Composable
 fun CircularButton(onClick: ()->Unit,color: Color = Color.White, clickable: Boolean) {
-    Button(onClick = { onClick() },
+    Button(onClick = {if(clickable){ onClick() }},
         modifier = Modifier
             .size(50.dp)
             .background(color = MaterialTheme.colorScheme.background),
         border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline),
         colors = ButtonDefaults.buttonColors(containerColor = color,
             contentColor =MaterialTheme.colorScheme.onBackground),
-        enabled = clickable
 
 
-    ) {
 
-    }
+    ) {}
 
 }
 @Composable
@@ -199,16 +216,11 @@ fun GameRow(choosenColors: MutableList<Color>, infoColors: List<Color>, click: B
 fun selectNextAvailableColor(availableColors: List<Color>, choosenColors: MutableList<Color>, buttonNumber: Int){
 
     val selectedColorsSet = choosenColors.toSet()
-
     val selectedColorForButton = choosenColors[buttonNumber]
-
     val availableColorsWithoutSelected = availableColors.filter { !selectedColorsSet.contains(it) }
-
     val currentIndex = availableColors.indexOf(selectedColorForButton)
-
     val nextIndex = (currentIndex + 1) % availableColorsWithoutSelected.size
-
-     choosenColors[buttonNumber] = availableColorsWithoutSelected[nextIndex]
+    choosenColors[buttonNumber] = availableColorsWithoutSelected[nextIndex]
 
 }
 fun selectRandomColors(availableColors: List<Color>): List<Color>{
