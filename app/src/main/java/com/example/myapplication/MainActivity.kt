@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 
 
 import androidx.compose.foundation.layout.Row
@@ -96,24 +97,27 @@ fun GameScreenInitial() {
 
     var choosenColorsList= remember {mutableStateListOf<List<Color>>()}
     var infoColorsList: LinkedList<List<Color>> = LinkedList()
-    var gamePlaying = true
+    var gamePlaying = remember {mutableStateOf(false)}
+    var gameOver = remember {mutableStateOf(false)}
     val rounds = remember {mutableStateOf(0)}
 
     Column{
-        Text(
-            text = "Your score: ", // jak dodam tu wyswietlenie jakiej kolwiek zmiennej remember to od nowa inicjuje zmienne i sie psuje wyswieltanie gamerow
-            style = MaterialTheme.typography.displayLarge,
-            modifier = Modifier.padding(bottom = 48.dp)
-        )
 
         val colorListInitial= listOf(Color.White,Color.White,Color.White,Color.White)
         LazyColumn(
             modifier = Modifier
-                .fillMaxHeight()
-                .padding(5.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .fillMaxHeight(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            contentPadding = PaddingValues(5.dp),
+            verticalArrangement = Arrangement.Top
         ) {
-
+            item {
+                Text(
+                    text = "Your score: ${(choosenColorsList.size)+1 }", // jak dodam tu wyswietlenie jakiej kolwiek zmiennej remember to od nowa inicjuje zmienne i sie psuje wyswieltanie gamerow
+                    style = MaterialTheme.typography.displayLarge,
+                    modifier = Modifier.padding(bottom = 48.dp)
+                )
+            }
             items(choosenColorsList.size) { rowNumber ->
                         GameRow(choosenColors = choosenColorsList[rowNumber].toMutableList(), infoColors = infoColorsList[rowNumber],
                             click = false,
@@ -121,26 +125,32 @@ fun GameScreenInitial() {
                             onCheckClick = {  })
             }
             item {
-                GameRow(choosenColors = choosenColors, infoColors = colorListInitial, click = true,
-                    onSelectColorClick = {index->selectNextAvailableColor(availableColors,choosenColors,index)},
-                    onCheckClick = {
-                        infoColorsList.add(checkColors(choosenColors, correctColors, backgroundColor))
-                        choosenColorsList.add(choosenColors.toList())
-                        rounds.value+=1
-                    })
+                if(!gameOver.value){
+                    GameRow(choosenColors = choosenColors, infoColors = colorListInitial, click = gamePlaying.value,
+                        onSelectColorClick = {
+                                index->selectNextAvailableColor(availableColors,choosenColors,index)
+                            gamePlaying.value=true             },
+                        onCheckClick = {
+                            val infoColor = checkColors(choosenColors, correctColors, backgroundColor)
+                            infoColorsList.add(infoColor)
+                            choosenColorsList.add(choosenColors.toList())
+                            if(correctColors==choosenColors.toList()){
+                                gameOver.value=true
+                            }
+                        })
+                }else{
+                    Button(
+                        onClick = { /*TODO*/ },
+                        modifier = Modifier.padding(10.dp)
+                            .background(Color.Cyan)
+
+                    ) {
+                        Text("Start over")
+                    }
+                }
+
             }
        }
-//        if(choosenColorsList.size>4){
-//            Button(
-//                onClick = { /*TODO*/ },
-//                modifier = Modifier.padding(10.dp)
-//                    .background(Color.Cyan)
-//
-//            ) {
-//                Text("Start over")
-//            }
-//        }
-
     }
 }
 @Composable
@@ -155,7 +165,7 @@ fun SelectableColorsRow(colorList: List<Color>,clickable:Boolean, onClick:(Int)-
 
 @Composable
 fun CircularButton(onClick: ()->Unit,color: Color = Color.White, clickable: Boolean) {
-    Button(onClick = {if(clickable){ onClick() }},
+    Button(onClick = { onClick() },
         modifier = Modifier
             .size(50.dp)
             .background(color = MaterialTheme.colorScheme.background),
@@ -197,7 +207,9 @@ fun FeedbackCircles(colorList: List<Color>){
 fun GameRow(choosenColors: MutableList<Color>, infoColors: List<Color>, click: Boolean,
             onSelectColorClick: (Int)->Unit, onCheckClick:()->Unit){
 
-    Row (horizontalArrangement = Arrangement.spacedBy(5.dp)){
+    Row (
+        horizontalArrangement = Arrangement.spacedBy(5.dp),
+        modifier = Modifier.padding(vertical = 5.dp)){
         SelectableColorsRow(choosenColors, clickable= click,
             onClick = { index -> onSelectColorClick(index) })
         IconButton(onClick = { onCheckClick() },
