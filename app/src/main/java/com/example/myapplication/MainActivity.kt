@@ -93,13 +93,12 @@ fun GameScreenInitial() {
         Color.DarkGray, Color.White)
     val backgroundColor=Color.White
     val choosenColors= remember { mutableStateListOf<Color>(backgroundColor, backgroundColor,backgroundColor,backgroundColor) }
-    val correctColors = selectRandomColors(availableColors)
+    var correctColors = selectRandomColors(availableColors)
 
     var choosenColorsList= remember {mutableStateListOf<List<Color>>()}
     var infoColorsList: LinkedList<List<Color>> = LinkedList()
     var gamePlaying = remember {mutableStateOf(false)}
     var gameOver = remember {mutableStateOf(false)}
-    val rounds = remember {mutableStateOf(0)}
 
     Column{
 
@@ -113,7 +112,7 @@ fun GameScreenInitial() {
         ) {
             item {
                 Text(
-                    text = "Your score: ${(choosenColorsList.size)+1 }", // jak dodam tu wyswietlenie jakiej kolwiek zmiennej remember to od nowa inicjuje zmienne i sie psuje wyswieltanie gamerow
+                    text = "Your score: ${(choosenColorsList.size)+1 }",
                     style = MaterialTheme.typography.displayLarge,
                     modifier = Modifier.padding(bottom = 48.dp)
                 )
@@ -140,10 +139,17 @@ fun GameScreenInitial() {
                         })
                 }else{
                     Button(
-                        onClick = { /*TODO*/ },
-                        modifier = Modifier.padding(10.dp)
-                            .background(Color.Cyan)
+                        onClick = {
+                            choosenColors.replaceAll { backgroundColor }
+                            correctColors = selectRandomColors(availableColors)
 
+                            choosenColorsList.clear()
+                            infoColorsList.clear()
+                            gamePlaying.value=false
+                            gameOver.value=false
+                                  },
+                        modifier = Modifier
+                            .padding(10.dp)
                     ) {
                         Text("Start over")
                     }
@@ -153,6 +159,7 @@ fun GameScreenInitial() {
        }
     }
 }
+
 @Composable
 fun SelectableColorsRow(colorList: List<Color>,clickable:Boolean, onClick:(Int)->Unit){
     Row(horizontalArrangement =
@@ -227,10 +234,13 @@ fun GameRow(choosenColors: MutableList<Color>, infoColors: List<Color>, click: B
 
 fun selectNextAvailableColor(availableColors: List<Color>, choosenColors: MutableList<Color>, buttonNumber: Int){
 
-    val selectedColorsSet = choosenColors.toSet()
+    val selectedColorsSet = choosenColors.toSet().toMutableSet()
     val selectedColorForButton = choosenColors[buttonNumber]
+
+    selectedColorsSet.remove(selectedColorForButton)
+
     val availableColorsWithoutSelected = availableColors.filter { !selectedColorsSet.contains(it) }
-    val currentIndex = availableColors.indexOf(selectedColorForButton)
+    val currentIndex = availableColorsWithoutSelected.indexOf(selectedColorForButton)
     val nextIndex = (currentIndex + 1) % availableColorsWithoutSelected.size
     choosenColors[buttonNumber] = availableColorsWithoutSelected[nextIndex]
 
@@ -454,6 +464,7 @@ fun ProfileScreenInitial() {
 fun GameScreenInitialPeview(){
     MyApplicationTheme {
         GameScreenInitial()
+
     }
 }
 
