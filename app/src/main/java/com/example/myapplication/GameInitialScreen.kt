@@ -6,7 +6,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -28,20 +31,23 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.myapplication.ui.theme.MyApplicationTheme
 import java.util.LinkedList
 
 @Composable
 fun GameScreenInitial(
     numberOfColors: Int,
-    onGoBackButtonClicked: (Any) -> Boolean,
-    onGoToScreen3ButtonClicked: () -> Unit
+    onGoBackButtonClicked: () -> Boolean,
+    onGoToScreen3ButtonClicked: (Any) -> Unit
 ) {
-    val availableColors= listOf(
+    val colors = listOf(
         Color.Blue, Color.Yellow, Color.Cyan, Color.Black, Color.Gray, Color.Red,
         Color.Magenta,
         Color.Green,
         Color.DarkGray, Color.White)
+    val availableColors= colors.take(numberOfColors)
     val backgroundColor= Color.White
     val choosenColors= remember { mutableStateListOf<Color>(backgroundColor, backgroundColor,backgroundColor,backgroundColor) }
     var correctColors = selectRandomColors(availableColors)
@@ -51,12 +57,13 @@ fun GameScreenInitial(
     var gamePlaying = remember { mutableStateOf(false) }
     var gameOver = remember { mutableStateOf(false) }
 
-    Column{
+    Column(modifier = Modifier.fillMaxSize(),horizontalAlignment = Alignment.CenterHorizontally){
 
         val colorListInitial= listOf(Color.White, Color.White, Color.White, Color.White)
         LazyColumn(
             modifier = Modifier
-                .fillMaxHeight(),
+                .fillMaxHeight()
+                .weight(1f),
             horizontalAlignment = Alignment.CenterHorizontally,
             contentPadding = PaddingValues(5.dp),
             verticalArrangement = Arrangement.Top
@@ -93,6 +100,8 @@ fun GameScreenInitial(
                         onClick = {
                             choosenColors.replaceAll { backgroundColor }
                             correctColors = selectRandomColors(availableColors)
+                            
+                            onGoToScreen3ButtonClicked(infoColorsList.size)
 
                             choosenColorsList.clear()
                             infoColorsList.clear()
@@ -102,11 +111,20 @@ fun GameScreenInitial(
                         modifier = Modifier
                             .padding(10.dp)
                     ) {
-                        Text("Start over")
+                        Text("High score table")
                     }
                 }
 
             }
+        }
+
+        Button(
+            onClick = {onGoBackButtonClicked()},
+            modifier = Modifier
+                .padding(top = 20.dp),
+
+        ) {
+            Text(text = "Logout")
         }
     }
 }
@@ -215,4 +233,16 @@ fun checkColors(choosenColors: MutableList<Color>, correctColors:List<Color>, ba
     }
     return returnList
 //    return TODO("Provide the return value")
+}
+
+@Preview
+@Composable
+fun GameScreenInitialPeview(){
+    MyApplicationTheme {
+        GameScreenInitial(
+            numberOfColors = 6,
+            onGoBackButtonClicked = {true},
+            onGoToScreen3ButtonClicked = {true}
+        )
+    }
 }

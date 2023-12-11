@@ -207,7 +207,7 @@ fun ProfileScreenInitial(onNavButtonClicked: (Int)->Unit={}) {
             errorMessage = "Number of colors must be a digit and be between 5 and 10"
         )
         Button(
-            onClick = {onNavButtonClicked(5)},
+            onClick = {onNavButtonClicked(colorsNum.value.toInt())},
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 20.dp),
