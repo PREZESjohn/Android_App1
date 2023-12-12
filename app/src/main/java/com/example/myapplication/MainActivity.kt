@@ -19,6 +19,9 @@ import com.example.myapplication.ui.theme.MyApplicationTheme
 
 import GameScreenInitial
 import ProfileScreenInitial
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -56,7 +59,17 @@ class MainActivity : ComponentActivity() {
         NavHost( navController = navController, startDestination = "ProfileScreenInitial"){
             composable(
                 "GameScreenInitial/{numberOfColors}",
-                arguments = listOf( navArgument( "numberOfColors" ) { type = NavType. IntType})
+                arguments = listOf( navArgument( "numberOfColors" ) { type = NavType. IntType}),
+                enterTransition = {
+                            slideIntoContainer(
+                                towards =  AnimatedContentTransitionScope.SlideDirection.Start
+                            )
+                },
+                exitTransition = {
+                    fadeOut()+
+                            slideOutOfContainer(towards = AnimatedContentTransitionScope.SlideDirection.End)
+                }
+
             ) { backStackEntry ->
                 val numberOfColors = backStackEntry.arguments?.getInt("numberOfColors")!!
                 GameScreenInitial(numberOfColors,
@@ -71,6 +84,16 @@ class MainActivity : ComponentActivity() {
             }
             composable(
                 "ProfileScreenInitial",
+                enterTransition = {
+                    fadeIn()+
+                    slideIntoContainer(
+                        towards =  AnimatedContentTransitionScope.SlideDirection.End
+                    )
+                },
+                exitTransition = {
+                    fadeOut()+
+                            slideOutOfContainer(towards = AnimatedContentTransitionScope.SlideDirection.End)
+                }
             ) { backStackEntry ->
                 ProfileScreenInitial(
                     onNavButtonClicked={numberOfColors->
@@ -83,7 +106,16 @@ class MainActivity : ComponentActivity() {
                 "ResultScreenInitial/{score}",
                 arguments = listOf(
                     navArgument("score") { type = NavType.IntType }
-                )
+                ),
+                enterTransition = {
+                    slideIntoContainer(
+                        towards =  AnimatedContentTransitionScope.SlideDirection.Start
+                    )
+                },
+                exitTransition = {
+                    fadeOut()+
+                            slideOutOfContainer(towards = AnimatedContentTransitionScope.SlideDirection.End)
+                }
             ) { backStackEntry ->
                 val score = backStackEntry.arguments?.getInt("score")!!
                 ResultScreen(

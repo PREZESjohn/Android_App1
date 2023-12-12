@@ -1,3 +1,6 @@
+import androidx.compose.animation.Animatable
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -24,6 +27,7 @@ import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -156,10 +160,17 @@ fun CircularButton(onClick: ()->Unit, color: Color = Color.White, clickable: Boo
 }
 @Composable
 fun SmallCircle(color: Color){
+    val value = remember { Animatable(Color.White) }
+    LaunchedEffect(Unit) {
+        value.animateTo(
+            color,
+            animationSpec = tween(500),
+        )
+    }
     Box(modifier = Modifier
         .clip(CircleShape)
         .size(20.dp)
-        .background(color = color)
+        .background(color = value)
         .border(2.dp, MaterialTheme.colorScheme.outline, CircleShape)
 
     )

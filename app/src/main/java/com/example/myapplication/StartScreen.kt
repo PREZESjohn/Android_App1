@@ -4,6 +4,11 @@ import android.util.Patterns
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -37,6 +42,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
@@ -138,6 +145,12 @@ private fun OutlinedTextFieldWithError(
 @Composable
 fun ProfileScreenInitial(onNavButtonClicked: (Int)->Unit={}) {
 
+    val infiniteTransition = rememberInfiniteTransition(label = "")
+    val scale by infiniteTransition.animateFloat(label = "",
+        initialValue = 0.5F,
+        targetValue = 1F,
+        animationSpec = infiniteRepeatable(tween(1000), RepeatMode.Reverse))
+
     val name = rememberSaveable { mutableStateOf("") }
     val email = rememberSaveable { mutableStateOf("") }
     val colorsNum = rememberSaveable{ mutableStateOf("") }
@@ -156,13 +169,17 @@ fun ProfileScreenInitial(onNavButtonClicked: (Int)->Unit={}) {
             .fillMaxSize()
             .padding(16.dp)
             .verticalScroll(rememberScrollState()),
+
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
             text = "MasterAnd",
             style = MaterialTheme.typography.displayLarge,
-            modifier = Modifier.padding(bottom = 48.dp)
+            modifier = Modifier.padding(bottom = 48.dp).graphicsLayer {
+                scaleX=scale
+                scaleY=scale
+                transformOrigin = TransformOrigin.Center },
         )
         Box {
             ProfileImageWithPicker(profileImageUri = profileImageUri.value, selectImageOnClick = {
