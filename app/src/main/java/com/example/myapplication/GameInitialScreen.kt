@@ -1,6 +1,16 @@
+import android.view.animation.Animation
 import androidx.compose.animation.Animatable
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.MutableTransitionState
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.repeatable
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -28,9 +38,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -60,10 +72,12 @@ fun GameScreenInitial(
     var infoColorsList: LinkedList<List<Color>> = LinkedList()
     var gamePlaying = remember { mutableStateOf(false) }
     var gameOver = remember { mutableStateOf(false) }
+    //var rowVisible by remember { mutableStateOf(false) }
 
     Column(modifier = Modifier.fillMaxSize(),horizontalAlignment = Alignment.CenterHorizontally){
 
         val colorListInitial= listOf(Color.White, Color.White, Color.White, Color.White)
+        //LaunchedEffect(Unit){rowVisible=true}
         LazyColumn(
             modifier = Modifier
                 .fillMaxHeight()
@@ -80,12 +94,17 @@ fun GameScreenInitial(
                 )
             }
             items(choosenColorsList.size) { rowNumber ->
+//                AnimatedVisibility(visible = rowVisible, enter = expandVertically(expandFrom = Alignment.Top)) {
+//
+//                }
                 GameRow(choosenColors = choosenColorsList[rowNumber].toMutableList(), infoColors = infoColorsList[rowNumber],
                     click = false,
                     onSelectColorClick = {},
                     onCheckClick = {  })
             }
+
             item {
+
                 if(!gameOver.value){
                     GameRow(choosenColors = choosenColors, infoColors = colorListInitial, click = gamePlaying.value,
                         onSelectColorClick = {
@@ -104,7 +123,7 @@ fun GameScreenInitial(
                         onClick = {
                             choosenColors.replaceAll { backgroundColor }
                             correctColors = selectRandomColors(availableColors)
-                            
+
                             onGoToScreen3ButtonClicked(infoColorsList.size)
 
                             choosenColorsList.clear()
@@ -123,7 +142,13 @@ fun GameScreenInitial(
         }
 
         Button(
-            onClick = {onGoBackButtonClicked()},
+            onClick = {
+                onGoBackButtonClicked()
+                choosenColorsList.clear()
+                infoColorsList.clear()
+                gamePlaying.value=false
+                gameOver.value=false
+                      },
             modifier = Modifier
                 .padding(top = 20.dp),
 
@@ -145,12 +170,20 @@ fun SelectableColorsRow(colorList: List<Color>, clickable:Boolean, onClick:(Int)
 
 @Composable
 fun CircularButton(onClick: ()->Unit, color: Color = Color.White, clickable: Boolean) {
+    val animateColor by remember {
+        mutableStateOf(false).apply { value = true }
+    }
+    val animatedColor by animateColorAsState(
+        if (animateColor) color else Color.White,
+        animationSpec = repeatable(3, tween(500),RepeatMode.Reverse)
+    )
+
     Button(onClick = { onClick() },
         modifier = Modifier
             .size(50.dp)
             .background(color = MaterialTheme.colorScheme.background),
         border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline),
-        colors = ButtonDefaults.buttonColors(containerColor = color,
+        colors = ButtonDefaults.buttonColors(containerColor = animatedColor,
             contentColor = MaterialTheme.colorScheme.onBackground),
 
 
@@ -160,17 +193,10 @@ fun CircularButton(onClick: ()->Unit, color: Color = Color.White, clickable: Boo
 }
 @Composable
 fun SmallCircle(color: Color){
-    val value = remember { Animatable(Color.White) }
-    LaunchedEffect(Unit) {
-        value.animateTo(
-            color,
-            animationSpec = tween(500),
-        )
-    }
     Box(modifier = Modifier
         .clip(CircleShape)
         .size(20.dp)
-        .background(color = value)
+        .background(color = color)
         .border(2.dp, MaterialTheme.colorScheme.outline, CircleShape)
 
     )
@@ -178,14 +204,25 @@ fun SmallCircle(color: Color){
 
 @Composable
 fun FeedbackCircles(colorList: List<Color>){
+    val color1 = remember { Animatable(Color.White) }
+    val color2 = remember { Animatable(Color.White) }
+    val color3 = remember { Animatable(Color.White) }
+    val color4 = remember { Animatable(Color.White) }
+    val timeBeetwen=300
+    LaunchedEffect(Unit) {
+        color1.animateTo(colorList[0],animationSpec = tween(timeBeetwen))
+        color2.animateTo(colorList[1],animationSpec = tween(timeBeetwen))
+        color3.animateTo(colorList[2],animationSpec = tween(timeBeetwen))
+        color4.animateTo(colorList[3],animationSpec = tween(timeBeetwen))
+    }
     Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
         Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-            SmallCircle(color = colorList[0])
-            SmallCircle(color = colorList[1])
+            SmallCircle(color = color1.value)
+            SmallCircle(color = color2.value)
         }
         Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-            SmallCircle(color = colorList[2])
-            SmallCircle(color = colorList[3])
+            SmallCircle(color = color3.value)
+            SmallCircle(color = color4.value)
         }
     }
 }
@@ -193,22 +230,39 @@ fun FeedbackCircles(colorList: List<Color>){
 @Composable
 fun GameRow(choosenColors: MutableList<Color>, infoColors: List<Color>, click: Boolean,
             onSelectColorClick: (Int)->Unit, onCheckClick:()->Unit){
+    var rowVisible by remember { mutableStateOf(false) }
+    val visibleState = remember { MutableTransitionState(false) }
+    val newTargetState = click
+    if (visibleState.targetState != newTargetState) visibleState.targetState =
+        newTargetState
+    LaunchedEffect(Unit){rowVisible=true}
+    AnimatedVisibility(visible = rowVisible, enter = expandVertically(expandFrom = Alignment.Top)) {
+        Row (
+            horizontalArrangement = Arrangement.spacedBy(5.dp),
+            modifier = Modifier.padding(vertical = 5.dp)){
 
-    Row (
-        horizontalArrangement = Arrangement.spacedBy(5.dp),
-        modifier = Modifier.padding(vertical = 5.dp)){
-        SelectableColorsRow(choosenColors, clickable= click,
-            onClick = { index -> onSelectColorClick(index) })
-        IconButton(onClick = { onCheckClick() },
-            modifier = Modifier
-                .clip(CircleShape)
-                .size(50.dp),
-            colors = IconButtonDefaults.filledIconButtonColors(),
-            enabled = click) {
-            Icon(Icons.Filled.Check, contentDescription ="Check"  )
+            SelectableColorsRow(choosenColors, clickable= click,
+                onClick = { index -> onSelectColorClick(index) })
+            AnimatedVisibility(visibleState = visibleState, enter = scaleIn(), exit = scaleOut()) {
+                IconButton(onClick = { onCheckClick() },
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .size(50.dp),
+                    colors = IconButtonDefaults.filledIconButtonColors(),
+                    enabled = click) {
+                    Icon(Icons.Filled.Check, contentDescription ="Check"  )
+                }
+            }
+            if (visibleState.isIdle && !visibleState.currentState){
+                IconButton(onClick = {},modifier = Modifier
+                    .clip(CircleShape)
+                    .size(50.dp),) {}
+            }
+            FeedbackCircles(infoColors)
+
         }
-        FeedbackCircles(infoColors)
     }
+
 
 }
 
