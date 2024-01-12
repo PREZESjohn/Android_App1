@@ -48,8 +48,11 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.example.myapplication.R
+import com.example.myapplication.providers.AppViewModelProvider
+import com.example.myapplication.viewmodels.ProfileViewModel
 
 @Composable
 private fun ProfileImageWithPicker(profileImageUri: Uri?, selectImageOnClick: () -> Unit) {
@@ -143,7 +146,9 @@ private fun OutlinedTextFieldWithError(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProfileScreenInitial(onNavButtonClicked: (Int)->Unit={}) {
+fun ProfileScreenInitial(onNavButtonClicked: (Int)->Unit={},
+        viewModel: ProfileViewModel=viewModel(factory = AppViewModelProvider.Factory)
+) {
 
     val infiniteTransition = rememberInfiniteTransition(label = "")
     val scale by infiniteTransition.animateFloat(label = "",
@@ -201,15 +206,15 @@ fun ProfileScreenInitial(onNavButtonClicked: (Int)->Unit={}) {
 
         OutlinedTextFieldWithError(
             label = "Name",
-            value = name,
-            onValueChange ={name.value=it},
+            value = viewModel.name,
+            onValueChange ={viewModel.name.value=it},
             isError ={ TextUtils.isEmpty(it)},
             errorMessage = "Name cannot be empty"
         )
         OutlinedTextFieldWithError(
             label = "Email",
-            value = email,
-            onValueChange ={email.value=it},
+            value = viewModel.email,
+            onValueChange ={viewModel.email.value=it},
             isError ={!Patterns.EMAIL_ADDRESS.matcher(it).matches()},
             errorMessage = "Email is not correct"
         )
