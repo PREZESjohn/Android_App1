@@ -8,5 +8,6 @@ data class Score(
     @PrimaryKey(autoGenerate = true)
     val scoreId: Long = 0,
     val playerId: Long,
+    val value: Long
     //dodać niezbędne pola...
 )

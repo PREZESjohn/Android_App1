@@ -1,8 +1,9 @@
 package com.example.myapplication.repositories.container
 
 import com.example.myapplication.repositories.PlayersRepository
+import com.example.myapplication.repositories.ScoresRepository
 
 interface AppContainer {
     val playersRepository: PlayersRepository
-    //tutaj dodać deklarację wszystkich repozytoriów...
+    val scoresRepository: ScoresRepository
 }

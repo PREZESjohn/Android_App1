@@ -12,11 +12,14 @@ class ProfileViewModel(private val playersRepository: PlayersRepository) : ViewM
     val email = mutableStateOf("")
     suspend fun savePlayer() {
         var player = playersRepository.getPlayersByEmail(email.value)
-        if (player ==null) {
+        if (player.isEmpty()) {
             var newPlayer=Player(name=name.value, email = email.value)
             playersRepository.insertPlayer(newPlayer)
+           // playersRepository.setCurrentPlayerId(newPlayer.playerId)
         }else{
-            // update player name
+           var updatePlayer=Player(playerId=player.first().playerId, name=name.value, email = player.first().email)
+            playersRepository.updatePlayer(updatePlayer)
+           // playersRepository.setCurrentPlayerId(updatePlayer.playerId)
         }
     }
 }

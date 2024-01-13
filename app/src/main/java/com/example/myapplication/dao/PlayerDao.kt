@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Update
 import com.example.myapplication.models.Player
 import kotlinx.coroutines.flow.Flow
 
@@ -19,4 +20,7 @@ interface PlayerDao {
     //metoda, która nie zwraca Flow musi być wstrzymująca
     @Query("SELECT * from players WHERE email = :email")
     suspend fun getPlayersByEmail(email: String): List<Player>
+
+    @Update
+    suspend fun updatePlayer(player: Player): Int
 }

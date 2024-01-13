@@ -6,6 +6,7 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.example.myapplication.dao.PlayerDao
 import com.example.myapplication.dao.PlayerScoreDao
+import com.example.myapplication.dao.ScoreDao
 import com.example.myapplication.models.Player
 import com.example.myapplication.models.Score
 
@@ -17,6 +18,7 @@ import com.example.myapplication.models.Score
 abstract class HighScoreDatabase : RoomDatabase() {
     abstract fun playerDao(): PlayerDao
     abstract fun playerScoreDao(): PlayerScoreDao
+    abstract fun scoreDao(): ScoreDao
     companion object {
         @Volatile
         private var Instance: HighScoreDatabase? = null
@@ -27,6 +29,7 @@ abstract class HighScoreDatabase : RoomDatabase() {
                 "highscore_database"
             )
                 .build().also { Instance = it }
+
         }
     }
 }

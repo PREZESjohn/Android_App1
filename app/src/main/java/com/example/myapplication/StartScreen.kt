@@ -37,6 +37,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -53,6 +54,7 @@ import coil.compose.AsyncImage
 import com.example.myapplication.R
 import com.example.myapplication.providers.AppViewModelProvider
 import com.example.myapplication.viewmodels.ProfileViewModel
+import kotlinx.coroutines.launch
 
 @Composable
 private fun ProfileImageWithPicker(profileImageUri: Uri?, selectImageOnClick: () -> Unit) {
@@ -169,6 +171,8 @@ fun ProfileScreenInitial(onNavButtonClicked: (Int)->Unit={},
             }
         })
 
+    val coroutineScope = rememberCoroutineScope()
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -181,10 +185,13 @@ fun ProfileScreenInitial(onNavButtonClicked: (Int)->Unit={},
         Text(
             text = "MasterAnd",
             style = MaterialTheme.typography.displayLarge,
-            modifier = Modifier.padding(bottom = 48.dp).graphicsLayer {
-                scaleX=scale
-                scaleY=scale
-                transformOrigin = TransformOrigin.Center },
+            modifier = Modifier
+                .padding(bottom = 48.dp)
+                .graphicsLayer {
+                    scaleX = scale
+                    scaleY = scale
+                    transformOrigin = TransformOrigin.Center
+                },
         )
         Box {
             ProfileImageWithPicker(profileImageUri = profileImageUri.value, selectImageOnClick = {
@@ -229,7 +236,12 @@ fun ProfileScreenInitial(onNavButtonClicked: (Int)->Unit={},
             errorMessage = "Number of colors must be a digit and be between 5 and 10"
         )
         Button(
-            onClick = {onNavButtonClicked(colorsNum.value.toInt())},
+            onClick = {
+                        coroutineScope.launch {
+                            viewModel.savePlayer()
+                        }
+                        onNavButtonClicked(colorsNum.value.toInt())
+                      },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 20.dp),

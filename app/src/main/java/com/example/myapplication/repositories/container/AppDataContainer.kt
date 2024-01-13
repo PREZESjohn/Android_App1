@@ -4,10 +4,14 @@ import android.content.Context
 import com.example.myapplication.HighScoreDatabase
 import com.example.myapplication.repositories.PlayersRepository
 import com.example.myapplication.repositories.PlayersRepositoryImpl
+import com.example.myapplication.repositories.ScoresRepository
+import com.example.myapplication.repositories.ScoresRepositoryImpl
 
 class AppDataContainer(private val context: Context) : AppContainer {
     override val playersRepository: PlayersRepository by lazy {
         PlayersRepositoryImpl(HighScoreDatabase.getDatabase(context).playerDao())
     }
-    //tutaj dodać implementację wszystkich repozytoriów...
+    override val scoresRepository: ScoresRepository by lazy {
+        ScoresRepositoryImpl(HighScoreDatabase.getDatabase(context).scoreDao())
+    }
 }
