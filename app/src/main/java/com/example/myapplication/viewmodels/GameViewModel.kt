@@ -8,11 +8,11 @@ import com.example.myapplication.repositories.PlayersRepository
 import com.example.myapplication.repositories.ScoresRepository
 
 class GameViewModel(val playersRepository: PlayersRepository, val scoresRepository: ScoresRepository): ViewModel() {
-    var playerId =0 //playersRepository.getCurrentPlayerId()
+    var playerId =playersRepository.getCurrentPlayerId()
     var score = mutableStateOf(0L)
     suspend fun savePlayerScore(){
-        //var score=Score(playerId = playerId.value!!, value = score.value)
-     //   scoresRepository.insertScore(score)
+        var score=Score(playerId = playerId.value!!, value = score.value )
+        scoresRepository.insertScore(score)
     }
 
 

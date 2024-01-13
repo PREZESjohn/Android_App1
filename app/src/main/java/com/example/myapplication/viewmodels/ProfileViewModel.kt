@@ -15,11 +15,12 @@ class ProfileViewModel(private val playersRepository: PlayersRepository) : ViewM
         if (player.isEmpty()) {
             var newPlayer=Player(name=name.value, email = email.value)
             playersRepository.insertPlayer(newPlayer)
-           // playersRepository.setCurrentPlayerId(newPlayer.playerId)
+            newPlayer = playersRepository.getPlayersByEmail(email.value).first()
+            playersRepository.setCurrentPlayerId(newPlayer.playerId)
         }else{
            var updatePlayer=Player(playerId=player.first().playerId, name=name.value, email = player.first().email)
             playersRepository.updatePlayer(updatePlayer)
-           // playersRepository.setCurrentPlayerId(updatePlayer.playerId)
+            playersRepository.setCurrentPlayerId(updatePlayer.playerId)
         }
     }
 }

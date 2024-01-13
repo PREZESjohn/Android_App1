@@ -6,9 +6,9 @@ import kotlinx.coroutines.flow.Flow
 
 interface PlayersRepository {
 
-//    fun getCurrentPlayerId(): LiveData<Long>
-//
-//    fun setCurrentPlayerId(playerId: Long)
+    fun getCurrentPlayerId(): LiveData<Long>
+
+    fun setCurrentPlayerId(playerId: Long)
     fun getAllPlayersStream(): Flow<List<Player>>
     fun getPlayerStream(id: Int): Flow<Player?>
     suspend fun getPlayersByEmail(email: String): List<Player>

@@ -7,14 +7,14 @@ import com.example.myapplication.models.Player
 import kotlinx.coroutines.flow.Flow
 
 class PlayersRepositoryImpl(private val playerDao: PlayerDao) : PlayersRepository {
-//    private val currentPlayerId = MutableLiveData<Long>()
-//
-//    override fun getCurrentPlayerId(): LiveData<Long>{
-//        return currentPlayerId
-//    }
-//    override fun setCurrentPlayerId(playerId: Long){
-//        currentPlayerId.postValue(playerId)
-//    }
+    private val currentPlayerId = MutableLiveData<Long>()
+
+    override fun getCurrentPlayerId(): LiveData<Long>{
+        return currentPlayerId
+    }
+    override fun setCurrentPlayerId(playerId: Long){
+        currentPlayerId.postValue(playerId)
+    }
 
     override fun getAllPlayersStream(): Flow<List<Player>> {
         TODO("Not yet implemented")

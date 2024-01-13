@@ -7,6 +7,7 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.myapplication.MasterAndApplication
 import com.example.myapplication.viewmodels.GameViewModel
 import com.example.myapplication.viewmodels.ProfileViewModel
+import com.example.myapplication.viewmodels.ResultViewModel
 
 
 object AppViewModelProvider {
@@ -17,6 +18,9 @@ object AppViewModelProvider {
         initializer {
             GameViewModel(masterAndApplication().container.playersRepository,
                 masterAndApplication().container.scoresRepository)
+        }
+        initializer {
+            ResultViewModel(masterAndApplication().container.playersScoresRepository)
         }
     }
 }

@@ -42,6 +42,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -49,14 +50,20 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.myapplication.providers.AppViewModelProvider
 import com.example.myapplication.ui.theme.MyApplicationTheme
+import com.example.myapplication.viewmodels.GameViewModel
+import com.example.myapplication.viewmodels.ProfileViewModel
+import kotlinx.coroutines.launch
 import java.util.LinkedList
 
 @Composable
 fun GameScreenInitial(
     numberOfColors: Int,
     onGoBackButtonClicked: () -> Boolean,
-    onGoToScreen3ButtonClicked: (Any) -> Unit
+    onGoToScreen3ButtonClicked: (Any) -> Unit,
+    viewModel: GameViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
     val colors = listOf(
         Color.Blue, Color.Yellow, Color.Cyan, Color.Black, Color.Gray, Color.Red,
@@ -73,6 +80,7 @@ fun GameScreenInitial(
     var gamePlaying = remember { mutableStateOf(false) }
     var gameOver = remember { mutableStateOf(false) }
     //var rowVisible by remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
 
     Column(modifier = Modifier.fillMaxSize(),horizontalAlignment = Alignment.CenterHorizontally){
 
@@ -123,6 +131,12 @@ fun GameScreenInitial(
                         onClick = {
                             choosenColors.replaceAll { backgroundColor }
                             correctColors = selectRandomColors(availableColors)
+
+                            viewModel.score.value= infoColorsList.size.toLong()
+
+                            coroutineScope.launch {
+                                viewModel.savePlayerScore()
+                            }
 
                             onGoToScreen3ButtonClicked(infoColorsList.size)
 
