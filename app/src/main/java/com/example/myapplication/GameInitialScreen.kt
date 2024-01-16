@@ -50,6 +50,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.myapplication.providers.AppViewModelProvider
 import com.example.myapplication.ui.theme.MyApplicationTheme
@@ -63,13 +64,12 @@ fun GameScreenInitial(
     numberOfColors: Int,
     onGoBackButtonClicked: () -> Boolean,
     onGoToScreen3ButtonClicked: (Any) -> Unit,
-    viewModel: GameViewModel = viewModel(factory = AppViewModelProvider.Factory)
+    //viewModel: GameViewModel = viewModel(factory = AppViewModelProvider.Factory)
+    viewModel: GameViewModel = hiltViewModel<GameViewModel>()
 ) {
     val colors = listOf(
         Color.Blue, Color.Yellow, Color.Cyan, Color.Black, Color.Gray, Color.Red,
-        Color.Magenta,
-        Color.Green,
-        Color.DarkGray, Color.White)
+        Color.Magenta,Color.Green,Color.DarkGray, Color.LightGray)
     val availableColors= colors.take(numberOfColors)
     val backgroundColor= Color.White
     val choosenColors= remember { mutableStateListOf<Color>(backgroundColor, backgroundColor,backgroundColor,backgroundColor) }
@@ -246,7 +246,8 @@ fun GameRow(choosenColors: MutableList<Color>, infoColors: List<Color>, click: B
             onSelectColorClick: (Int)->Unit, onCheckClick:()->Unit){
     var rowVisible by remember { mutableStateOf(false) }
     val visibleState = remember { MutableTransitionState(false) }
-    val newTargetState = click
+    val newTargetState = click && !choosenColors.contains(Color.White)
+
     if (visibleState.targetState != newTargetState) visibleState.targetState =
         newTargetState
     LaunchedEffect(Unit){rowVisible=true}

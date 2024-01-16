@@ -20,6 +20,9 @@ import com.example.myapplication.ui.theme.MyApplicationTheme
 import GameScreenInitial
 import ProfileScreenInitial
 import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.core.EaseIn
+import androidx.compose.animation.core.EaseOut
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.navigation.NavHostController
@@ -28,8 +31,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import dagger.hilt.android.AndroidEntryPoint
 
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,25 +61,29 @@ class MainActivity : ComponentActivity() {
     }
     @Composable
     fun NavigationGraph(navController: NavHostController) {
+        val animDur = 500
         NavHost( navController = navController, startDestination = "ProfileScreenInitial"){
             composable(
                 "GameScreenInitial/{numberOfColors}",
                 arguments = listOf( navArgument( "numberOfColors" ) { type = NavType. IntType}),
                 enterTransition = {
+                    fadeIn()+
                             slideIntoContainer(
-                                towards =  AnimatedContentTransitionScope.SlideDirection.Start
+                                towards =  AnimatedContentTransitionScope.SlideDirection.Start,
+                                animationSpec = tween(animDur, easing=EaseOut)
                             )
                 },
                 exitTransition = {
                     fadeOut()+
-                            slideOutOfContainer(towards = AnimatedContentTransitionScope.SlideDirection.End)
+                            slideOutOfContainer(towards = AnimatedContentTransitionScope.SlideDirection.End,
+                                animationSpec = tween(animDur, easing=EaseIn))
                 }
 
             ) { backStackEntry ->
                 val numberOfColors = backStackEntry.arguments?.getInt("numberOfColors")!!
                 GameScreenInitial(numberOfColors,
                     onGoBackButtonClicked ={
-                            navController.navigateUp()
+                            navController.popBackStack()
                     },
                     onGoToScreen3ButtonClicked = {score->
                         navController.navigate("ResultScreenInitial/$score")
@@ -87,12 +96,14 @@ class MainActivity : ComponentActivity() {
                 enterTransition = {
                     fadeIn()+
                     slideIntoContainer(
-                        towards =  AnimatedContentTransitionScope.SlideDirection.End
+                        towards =  AnimatedContentTransitionScope.SlideDirection.End,
+                        animationSpec = tween(animDur, easing=EaseOut)
                     )
                 },
                 exitTransition = {
                     fadeOut()+
-                            slideOutOfContainer(towards = AnimatedContentTransitionScope.SlideDirection.End)
+                            slideOutOfContainer(towards = AnimatedContentTransitionScope.SlideDirection.Start,
+                                animationSpec = tween(animDur, easing=EaseIn))
                 }
             ) { backStackEntry ->
                 ProfileScreenInitial(
@@ -108,23 +119,26 @@ class MainActivity : ComponentActivity() {
                     navArgument("score") { type = NavType.IntType }
                 ),
                 enterTransition = {
+                    fadeIn()+
                     slideIntoContainer(
-                        towards =  AnimatedContentTransitionScope.SlideDirection.Start
+                        towards =  AnimatedContentTransitionScope.SlideDirection.Start,
+                        animationSpec = tween(animDur, easing=EaseOut)
                     )
                 },
                 exitTransition = {
                     fadeOut()+
-                            slideOutOfContainer(towards = AnimatedContentTransitionScope.SlideDirection.End)
+                            slideOutOfContainer(towards = AnimatedContentTransitionScope.SlideDirection.End,
+                                animationSpec = tween(animDur, easing=EaseIn))
                 }
             ) { backStackEntry ->
                 val score = backStackEntry.arguments?.getInt("score")!!
                 ResultScreen(
                     score=score,
                     onRestartGameClicked = {
-                        navController.navigateUp()
+                        navController.popBackStack()
                 },
                     onLogoutClicked = {
-                        navController.navigate("ProfileScreenInitial")
+                        navController.popBackStack("ProfileScreenInitial", inclusive = false)
                     }
                 )
             }

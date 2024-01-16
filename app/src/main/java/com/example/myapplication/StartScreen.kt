@@ -4,12 +4,14 @@ import android.util.Patterns
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -32,6 +34,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldColors
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
@@ -43,12 +47,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.example.myapplication.R
@@ -115,24 +121,29 @@ private fun OutlinedTextFieldWithError(
         singleLine = true,
         label = { Text(label) },
         keyboardOptions = KeyboardOptions.Default.copy(keyboardType = keyboardType),
-        isError = isError(value.value),
+        isError = isError(value.value )&& isFocused,
         modifier = modifier,
         supportingText = {
 //                if (isError(value.value) && isFocused) {
 //                    Text(text=errorMessage)
 //                }
         },
+
         trailingIcon = {
             if (isError(value.value) && isFocused)
                 Icon(Icons.Filled.Warning,"error", tint = MaterialTheme.colorScheme.error)
         },
+        colors = TextFieldDefaults.outlinedTextFieldColors(
+            focusedBorderColor = Color.Black,
+            unfocusedBorderColor=Color.Black,
+            errorBorderColor = Color.Red)
     )
 
     if (isError(value.value) && isFocused) {
         //Row(modifier=Modifier.fillMaxHeight(), verticalAlignment = Alignment.CenterVertically) {
         Text(text = errorMessage, modifier = Modifier
             .padding(top = 4.dp)
-            .fillMaxHeight())
+            .fillMaxHeight(), color=Color.Red)
         //}
     }else{
         //Row(modifier=Modifier.fillMaxHeight(), verticalAlignment = Alignment.CenterVertically) {
@@ -149,7 +160,8 @@ private fun OutlinedTextFieldWithError(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreenInitial(onNavButtonClicked: (Int)->Unit={},
-        viewModel: ProfileViewModel=viewModel(factory = AppViewModelProvider.Factory)
+        //viewModel: ProfileViewModel=viewModel(factory = AppViewModelProvider.Factory)
+                         viewModel: ProfileViewModel = hiltViewModel<ProfileViewModel>()
 ) {
 
     val infiniteTransition = rememberInfiniteTransition(label = "")

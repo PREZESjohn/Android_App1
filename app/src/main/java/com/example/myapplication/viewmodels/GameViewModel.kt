@@ -6,8 +6,12 @@ import com.example.myapplication.models.Player
 import com.example.myapplication.models.Score
 import com.example.myapplication.repositories.PlayersRepository
 import com.example.myapplication.repositories.ScoresRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 
-class GameViewModel(val playersRepository: PlayersRepository, val scoresRepository: ScoresRepository): ViewModel() {
+@HiltViewModel
+//class GameViewModel(val playersRepository: PlayersRepository, val scoresRepository: ScoresRepository): ViewModel() {
+class GameViewModel @Inject constructor(private val playersRepository: PlayersRepository, val scoresRepository: ScoresRepository): ViewModel() {
     var playerId =playersRepository.getCurrentPlayerId()
     var score = mutableStateOf(0L)
     suspend fun savePlayerScore(){

@@ -4,9 +4,18 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.example.myapplication.dao.PlayerDao
 import com.example.myapplication.models.Player
+import dagger.Binds
+import dagger.Module
+import dagger.hilt.InstallIn
+import dagger.hilt.android.components.ViewModelComponent
 import kotlinx.coroutines.flow.Flow
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class PlayersRepositoryImpl(private val playerDao: PlayerDao) : PlayersRepository {
+
+//class PlayersRepositoryImpl(private val playerDao: PlayerDao) : PlayersRepository {
+@Singleton
+class PlayersRepositoryImpl @Inject constructor(private val playerDao: PlayerDao) : PlayersRepository {
     private val currentPlayerId = MutableLiveData<Long>()
 
     override fun getCurrentPlayerId(): LiveData<Long>{

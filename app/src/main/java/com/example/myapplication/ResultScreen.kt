@@ -45,6 +45,7 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.myapplication.models.PlayerWithScore
 import com.example.myapplication.providers.AppViewModelProvider
@@ -55,13 +56,13 @@ import kotlinx.coroutines.flow.collect
 
 @Composable
 fun ResultScreen(score: Int, onRestartGameClicked: () -> Unit, onLogoutClicked: () -> Unit,
-                 viewModel: ResultViewModel = viewModel(factory = AppViewModelProvider.Factory)
+                 //viewModel: ResultViewModel = viewModel(factory = AppViewModelProvider.Factory)
+                 viewModel: ResultViewModel = hiltViewModel<ResultViewModel>()
 ) {
     var playersFlow=viewModel.loadPlayersScores()
     var playersScores by remember {
         mutableStateOf(emptyList<PlayerWithScore>())
     }
-    //tu sie wyjebalo, gora
     LaunchedEffect(playersFlow){
         playersFlow.collect{newPlayers ->
             playersScores=newPlayers
